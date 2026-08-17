@@ -146,7 +146,7 @@ public class SearchManager {
                             try {
                                 searchSession.setTimeFrom(LocalDateTime.parse(timeStamp.substring(fromStart, fromEnd), dateTimeFormatter));
                                 searchSession.setTimeTo(LocalDateTime.parse(timeStamp.substring(toStart, toEnd), dateTimeFormatter));
-                                if (searchSession.getTimeTo().isAfter(searchSession.getTimeFrom())) {
+                                if (searchSession.getTimeFrom().isAfter(searchSession.getTimeTo())) {
                                     System.out.println("[ERROR] Start time after end time");
                                 } else {
                                     isTimeStampValid = true;
@@ -157,64 +157,64 @@ public class SearchManager {
                         }
                     }
                 }
-
-                searchSession.getQueueSearchStatsList().clear();
-                searchSession.setSessionStart(LocalDateTime.now());
-                System.out.printf("%n[INFO] Search started%n");
-
-                for (String queueName : searchSession.getTargetList()) {
-                    searchSession.getQueueManagerList().clear();
-                    JsonNode qmListNode = queueConfig.get(queueName).get(Constants.Config.QCONFIG_QMGR_LIST_NAME);
-                    for (JsonNode qmNode : qmListNode) {
-                        String qmEnv = queueManagerConfig.path(qmNode.asText()).path(Constants.Config.QMCONFIG_ENV_NAME).asText();
-                        if (Objects.equals(qmEnv, searchSession.getEnvironment())) {
-                            searchSession.getQueueManagerList().add(qmNode.asText());
-                        }
-                    }
-                    for (String queueManagerName : searchSession.getQueueManagerList()) {
-                        QueueSearchStats queueSearchStats = new QueueSearchStats(queueName, queueManagerName);
-                        try {
-                            int messageCount = MQManager.getInstance().getQueueDepth(queueName, queueManagerName);
-                            queueSearchStats.setMessageCount(messageCount);
-                        } catch (MQException e) {
-                            System.out.printf("%s %s%n", Constants.Messages.ERROR_MQ_EXCEPTION, e.getMessage());
-                        }
-                        System.out.printf("[INFO] Checking '%s' (%s)%n", queueName, queueManagerName);
-                        System.out.printf("[INFO] Messages in queue: %d%n", queueSearchStats.getMessageCount());
-                        if (queueSearchStats.getMessageCount() != 0) {
-                            MQManager.getInstance().browseQueue(queueName, queueManagerName, searchSession, queueSearchStats);
-                        }
-                        System.out.printf("[INFO] Matching messages in queue: %d%n", queueSearchStats.getMatchCount());
-                        searchSession.addQueueSearchStats(queueSearchStats);
-                    }
-                }
-                searchSession.setSessionEnd(LocalDateTime.now());
-                System.out.println("[INFO] Search finished");
-                DateTimeFormatter logDateTimeFormatter = DateTimeFormatter.ofPattern(Constants.Config.LOG_DT_FORMAT);
-                System.out.printf("%n");
-                System.out.printf("--- MQ-Search v%s ---%n", Constants.Config.APP_VERSION);
-                System.out.printf("%-13s %s%n", "Environment: ", searchSession.getEnvironment());
-                System.out.printf("%-13s %s%n", "Started: ", searchSession.getSessionStart().format(logDateTimeFormatter));
-                System.out.printf("%-13s %s%n", "Finished: ", searchSession.getSessionEnd().format(logDateTimeFormatter));
-                System.out.printf("%-13s %.3f s%n", "Duration: ", Duration.between(searchSession.getSessionStart(), searchSession.getSessionEnd()).toMillis() / 1000.0);
-                System.out.printf("---%n");
-                System.out.printf("%-13s %s%n", "Search: ", (searchSession.getSearchParameters().isEmpty() ? "*" : searchSession.getSearchParameters()));
-                System.out.printf("%-13s %s%n", "Time from: ", (Objects.isNull(searchSession.getTimeFrom()) ? "*" : searchSession.getTimeFrom().format(logDateTimeFormatter)));
-                System.out.printf("%-13s %s%n", "Time to: ", (Objects.isNull(searchSession.getTimeTo()) ? "*" : searchSession.getTimeTo().format(logDateTimeFormatter)));
-                System.out.printf("---%n");
-                String firstColumnHead = "Matches";
-                String secondColumnHead = "Queue (QMGR)";
-                System.out.printf("%-13s %s%n", firstColumnHead, secondColumnHead);
-                System.out.printf("%-13s %s%n", "-------", "------------");
-                List<QueueSearchStats> queueSearchStatsList = searchSession.getQueueSearchStatsList();
-                for (QueueSearchStats queueSearchStats : queueSearchStatsList) {
-                    String firstColumnValue = "[" + queueSearchStats.getMatchCount() + "/" + queueSearchStats.getMessageCount() + "]";
-                    String secondColumnValue = queueSearchStats.getQueueName() + "(" + queueSearchStats.getQueueManagerName() + ")";
-                    System.out.printf("%-13s %s%n", firstColumnValue, secondColumnValue);
-                }
-                System.out.printf("TOTAL: [%s/%s]%n", getTotalMatchCount(searchSession), getTotalMessageCount(searchSession));
-                System.out.printf("---%n");
             }
+
+            searchSession.getQueueSearchStatsList().clear();
+            searchSession.setSessionStart(LocalDateTime.now());
+            System.out.printf("%n[INFO] Search started%n");
+
+            for (String queueName : searchSession.getTargetList()) {
+                searchSession.getQueueManagerList().clear();
+                JsonNode qmListNode = queueConfig.get(queueName).get(Constants.Config.QCONFIG_QMGR_LIST_NAME);
+                for (JsonNode qmNode : qmListNode) {
+                    String qmEnv = queueManagerConfig.path(qmNode.asText()).path(Constants.Config.QMCONFIG_ENV_NAME).asText();
+                    if (Objects.equals(qmEnv, searchSession.getEnvironment())) {
+                        searchSession.getQueueManagerList().add(qmNode.asText());
+                    }
+                }
+                for (String queueManagerName : searchSession.getQueueManagerList()) {
+                    QueueSearchStats queueSearchStats = new QueueSearchStats(queueName, queueManagerName);
+                    try {
+                        int messageCount = MQManager.getInstance().getQueueDepth(queueName, queueManagerName);
+                        queueSearchStats.setMessageCount(messageCount);
+                    } catch (MQException e) {
+                        System.out.printf("%s %s%n", Constants.Messages.ERROR_MQ_EXCEPTION, e.getMessage());
+                    }
+                    System.out.printf("[INFO] Checking '%s' (%s)%n", queueName, queueManagerName);
+                    System.out.printf("[INFO] Messages in queue: %d%n", queueSearchStats.getMessageCount());
+                    if (queueSearchStats.getMessageCount() != 0) {
+                        MQManager.getInstance().browseQueue(queueName, queueManagerName, searchSession, queueSearchStats);
+                    }
+                    System.out.printf("[INFO] Matching messages in queue: %d%n", queueSearchStats.getMatchCount());
+                    searchSession.addQueueSearchStats(queueSearchStats);
+                }
+            }
+            searchSession.setSessionEnd(LocalDateTime.now());
+            System.out.println("[INFO] Search finished");
+            DateTimeFormatter logDateTimeFormatter = DateTimeFormatter.ofPattern(Constants.Config.LOG_DT_FORMAT);
+            System.out.printf("%n");
+            System.out.printf("--- MQ-Search v%s ---%n", Constants.Config.APP_VERSION);
+            System.out.printf("%-13s %s%n", "Environment: ", searchSession.getEnvironment());
+            System.out.printf("%-13s %s%n", "Started: ", searchSession.getSessionStart().format(logDateTimeFormatter));
+            System.out.printf("%-13s %s%n", "Finished: ", searchSession.getSessionEnd().format(logDateTimeFormatter));
+            System.out.printf("%-13s %.3f s%n", "Duration: ", Duration.between(searchSession.getSessionStart(), searchSession.getSessionEnd()).toMillis() / 1000.0);
+            System.out.printf("---%n");
+            System.out.printf("%-13s %s%n", "Search: ", (searchSession.getSearchParameters().isEmpty() ? "*" : searchSession.getSearchParameters()));
+            System.out.printf("%-13s %s%n", "Time from: ", (Objects.isNull(searchSession.getTimeFrom()) ? "*" : searchSession.getTimeFrom().format(logDateTimeFormatter)));
+            System.out.printf("%-13s %s%n", "Time to: ", (Objects.isNull(searchSession.getTimeTo()) ? "*" : searchSession.getTimeTo().format(logDateTimeFormatter)));
+            System.out.printf("---%n");
+            String firstColumnHead = "Matches";
+            String secondColumnHead = "Queue (QMGR)";
+            System.out.printf("%-13s %s%n", firstColumnHead, secondColumnHead);
+            System.out.printf("%-13s %s%n", "-------", "------------");
+            List<QueueSearchStats> queueSearchStatsList = searchSession.getQueueSearchStatsList();
+            for (QueueSearchStats queueSearchStats : queueSearchStatsList) {
+                String firstColumnValue = "[" + queueSearchStats.getMatchCount() + "/" + queueSearchStats.getMessageCount() + "]";
+                String secondColumnValue = queueSearchStats.getQueueName() + " " + "(" + queueSearchStats.getQueueManagerName() + ")";
+                System.out.printf("%-13s %s%n", firstColumnValue, secondColumnValue);
+            }
+            System.out.printf("TOTAL: [%s/%s]%n", getTotalMatchCount(searchSession), getTotalMessageCount(searchSession));
+            System.out.printf("---%n");
         }
     }
 }

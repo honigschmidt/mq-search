@@ -10,7 +10,7 @@ public final class Constants {
 
     public static final class Config {
         private Config() {}
-        public static final String APP_VERSION = "1.4.1";
+        public static final String APP_VERSION = "1.4.4";
         public static final String LOG_DT_FORMAT = "yyyy-MM-dd HH:mm:ss";
         public static final int MAX_SEARCH_PARAMS = 4;
         public static final String QCONFIG_QMGR_LIST_NAME = "qmgrList";

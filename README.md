@@ -2,14 +2,14 @@
 
 **MQ-Search** is a lightweight, high-performance Java command-line interface (CLI) engineered to seamlessly browse, search, and extract message payloads directly from IBM MQ infrastructures without altering queue states.
 
+![MQ-Search CLI](demo.png)
+
 ### Key Features
 
 + **Dynamic Queue Selection:** Instantly isolate specific queues directly via interactive runtime prompts or CLI argument wildcards. Streamline repetitive workflows by loading a pre-configured list of target queues directly from local configuration files.
 + **Advanced Contextual Deep-Search:** Locate business-critical data rapidly using multi-layered search parameters. Filter the active message stream by exact string matches, wildcard keywords, or narrow the search window to a precise historical timeline using localized cryptographic timestamps.
 + **Intelligent Payload Pretty-Printing:** Accelerate manual debugging and log analysis with built-in structural parsing. The client automatically detects, formats, and syntax-highlights complex **JSON** and **XML** message payloads, transforming dense, minified production strings into highly readable, structured views.
 + **Native Multi-Environment Support:** Built with environment abstractions to manage complex enterprise staging environments smoothly. Effortlessly hot-swap configurations, connection parameters, and authentication credentials between DEV, TEST, PRE-PROD, and PROD clusters using isolated runtime configuration profiles.
-
-Please refer to the included screen capture for an overview of command-line interface.
 
 ### Deployment & Initialization
 
@@ -40,7 +40,3 @@ For local testing and validation, a pre-configured environment is compatible wit
 After starting your container, ensure the following permissions are granted for diagnostic access:
 + setmqaut -m QM1 -t queue -n SYSTEM.ADMIN.COMMAND.QUEUE -g nobody +inq +put
 + setmqaut -m QM1 -t queue -n SYSTEM.DEFAULT.MODEL.QUEUE -g nobody +get +inq +browse
-
-### License
-
-This project is licensed under the **MIT No Attribution License** — see the [LICENSE](LICENSE) file for full text and parameters.
